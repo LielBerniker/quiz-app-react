@@ -3,6 +3,7 @@ import {BrowserRouter as Router,Routes,Route } from 'react-router-dom'
 import Home from './components/Home'
 import GamePage from "./components/GamePage"
 import ScorePage from "./components/ScorePage"
+/*the main application that load the differnt pages of the web app*/ 
 function App() {
    
     return (

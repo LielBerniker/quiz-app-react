@@ -8,6 +8,7 @@ import { GiStarMedal } from "react-icons/gi";
 import './GamePage.css'
 import M from 'materialize-css'
 
+/*the main component of the game play page*/ 
 function GamePlay() {
     var interval = null
     const location = useLocation()
@@ -28,7 +29,8 @@ function GamePlay() {
 
     const [counter, setCounter] = React.useState(60);
 
-    // Third Attempts
+    
+/*run the timer from 60 to 0*/ 
     React.useEffect(() => {
         const timer =
             counter > 0 && setInterval(() => setCounter(counter - 1), 1000)
@@ -38,11 +40,15 @@ function GamePlay() {
     }, [counter]);
 
 
+/*use the click sound*/ 
     function play_click_sound() {
         document.getElementById('click-sound').play()
     }
 
+/*check if the answer is wright or wrong*/ 
     function check_answer(value1) {
+        
+/*check if the game has been finished*/ 
         if(showFinal===true){
             M.toast(
                 {
@@ -51,6 +57,7 @@ function GamePlay() {
                     displayLength: 3000
                 })
         }
+        /*check if an option has already been chsen*/ 
         else if(canChoose===false)
         {
             M.toast(
@@ -60,6 +67,7 @@ function GamePlay() {
                     displayLength: 3000
                 })
         } 
+        /*check if the timer did not end*/ 
         else if(counter <= 0) {
             M.toast(
                 {
@@ -68,7 +76,9 @@ function GamePlay() {
                     displayLength: 3000
                 })
         }
+        /*update for correct answer*/ 
         else {
+            /*check if the answer is correct*/ 
             if (value1 === currentQuestion.correct_answer) {
                 setScore(score +get_score())
                 setWrightQuestions(wrightQuestions + 1)
@@ -97,6 +107,7 @@ function GamePlay() {
             }
         }
     }
+    /*calcolate the score by the time and question diffuclty*/ 
     function get_score() {
         var point_get
         if (counter > 40) {
@@ -120,6 +131,7 @@ function GamePlay() {
         }
         return point_get
     }
+    /*get the answers for the question*/ 
     function set_values(cur_q) {
         if (cur_q.type === "multiple") {
             setChoose4(true)
@@ -152,7 +164,7 @@ function GamePlay() {
             }
         }
     }
-
+/*update information for next questiond*/ 
     function next_questain() {
         
         if (currentQN < 8) {
@@ -176,7 +188,7 @@ function GamePlay() {
         }
     }
 
-
+/*update info at the beginning*/ 
     React.useEffect(() => {
         setPlayerNmae(location.state.playerName)
         setAllQuestions(location.state.allQuestions)

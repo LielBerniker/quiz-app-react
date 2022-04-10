@@ -2,14 +2,17 @@ import React, { Fragment } from 'react'
 import { Helmet } from 'react-helmet'
 import { Link } from 'react-router-dom'
 import './Home.css'
-
+/*component for the beginning page*/ 
 function Home() {
   const [questionsRand, setQuestionsRand] = React.useState([])
   const [playerName, setPlayerNmae] = React.useState("")
+
+  /*update the questions from the api */ 
   React.useEffect(() => {
     fetch("https://opentdb.com/api.php?amount=100")
       .then((res) => res.json())
       .then(data => get8Questions(data.results))
+      /*get questions randomly from the api */ 
     function get8Questions(arrOfQuestions) {
 
       const newarr = [];
@@ -43,7 +46,7 @@ function Home() {
       setQuestionsRand(newarr);
     }
   }, [])
-
+/*change name*/ 
   function handleChangeName(event) {
     setPlayerNmae(event.target.value)
   }
