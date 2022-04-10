@@ -1,13 +1,15 @@
 import React, { Fragment } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, Router } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import { FiCheckCircle } from "react-icons/fi";
-import { HiOutlineLightBulb } from "react-icons/hi";
+import { FaFistRaised } from "react-icons/fa";
 import { AiFillClockCircle } from "react-icons/ai";
+import { GiStarMedal } from "react-icons/gi";
 import './GamePage.css'
 import M from 'materialize-css'
 
 function GamePlay() {
+    var interval = null
     const location = useLocation()
     const [allQuestions, setAllQuestions] = React.useState([])
     const [playerName, setPlayerNmae] = React.useState("")
@@ -22,31 +24,102 @@ function GamePlay() {
     const [Val4, setVal4] = React.useState("")
     const [choose4, setChoose4] = React.useState(true)
     const [canChoose, setCanChoose] = React.useState(true)
+    const [showFinal, setShowFinal] = React.useState(false)
+
+    const [counter, setCounter] = React.useState(60);
+
+    // Third Attempts
+    React.useEffect(() => {
+        const timer =
+            counter > 0 && setInterval(() => setCounter(counter - 1), 1000)
+
+
+        return () => clearInterval(timer);
+    }, [counter]);
+
+
+    function play_click_sound() {
+        document.getElementById('click-sound').play()
+    }
 
     function check_answer(value1) {
-        if (value1 === currentQuestion.correct_answer) {
-            setScore(score + 1)
-            setWrightQuestions(wrightQuestions + 1)
-            setCanChoose(false)
-            document.getElementById('correct-sound').play()
+        if(showFinal===true){
             M.toast(
                 {
-                    html:"you are wright :)",
-                    classes:'toast-valid',
-                    displayLength: 1500
+                    html: "You finish the Quiz, please press finish for the results",
+                    classes: 'toast-finish',
+                    displayLength: 3000
+                })
+        }
+        else if(canChoose===false)
+        {
+            M.toast(
+                {
+                    html: "You cant choose an answer more then once!!!",
+                    classes: 'toast-allready',
+                    displayLength: 3000
+                })
+        } 
+        else if(counter <= 0) {
+            M.toast(
+                {
+                    html: "Time is over, please go to the next question",
+                    classes: 'toast-over',
+                    displayLength: 3000
                 })
         }
         else {
-            document.getElementById('wrong-sound').play()
-            M.toast(
-                {
-                    html:"you are wrong :(",
-                    classes:'toast-in-valid',
-                    displayLength: 1500
-                })
+            if (value1 === currentQuestion.correct_answer) {
+                setScore(score +get_score())
+                setWrightQuestions(wrightQuestions + 1)
+                setCanChoose(false)
+                setTimeout(() => {
+                    document.getElementById('correct-sound').play()
+                }, 500)
+                M.toast(
+                    {
+                        html: "you are wright :)",
+                        classes: 'toast-valid',
+                        displayLength: 1500
+                    })
+            }
+            else {
+                setTimeout(() => {
+                    document.getElementById('wrong-sound').play()
+                }, 500)
+                setCanChoose(false)
+                M.toast(
+                    {
+                        html: "you are wrong :(",
+                        classes: 'toast-in-valid',
+                        displayLength: 1500
+                    })
+            }
         }
     }
+    function get_score() {
+        var point_get
+        if (counter > 40) {
+            point_get = 3
+        }
+        else if (counter > 20) {
+            point_get = 2
+        }
+        else {
+            point_get = 1
+        }
 
+        if (currentQN < 5) {
+            point_get = point_get
+        }
+        else if (currentQN < 7) {
+            point_get = point_get * 2
+        }
+        else {
+            point_get = point_get * 3
+        }
+        return point_get
+    }
     function set_values(cur_q) {
         if (cur_q.type === "multiple") {
             setChoose4(true)
@@ -81,16 +154,28 @@ function GamePlay() {
     }
 
     function next_questain() {
+        
         if (currentQN < 8) {
-            setcurrentQN(currentQN + 1)
-            setCurrentQuestion(allQuestions[currentQN - 1])
-            set_values(currentQuestion)
+            setCounter(60)
+            play_click_sound()
+            const cur_q = allQuestions[currentQN]
+            const count_q = currentQN+1
+            set_values(cur_q)
+            setcurrentQN(count_q)
+            setCurrentQuestion(cur_q)
             setCanChoose(true)
         }
         else {
-            console.log("put here link to final page")
+            setShowFinal(true)
+            M.toast(
+                {
+                    html: "You finish the Quiz, please press finish for the results",
+                    classes: 'toast-finish',
+                    displayLength: 3000
+                })
         }
     }
+
 
     React.useEffect(() => {
         setPlayerNmae(location.state.playerName)
@@ -105,17 +190,18 @@ function GamePlay() {
             <Fragment>
                 <audio id='correct-sound' src='/sounds/Correct.mp3'></audio>
                 <audio id='wrong-sound' src='/sounds/Wrong.mp3'></audio>
+                <audio id='click-sound' src='/sounds/Mouse-click.mp3'></audio>
             </Fragment>
             <div className='questions'>
-                <h2 className='top-line'>Quiz Mode</h2>
+                <h1 className='top-line'>Quiz Mode</h1>
                 <div className='lifeline-container'>
                     <p>
                         <FiCheckCircle className='vi-icon' />
                         <span className='liseline'>{wrightQuestions}</span>
                     </p>
                     <p>
-                        <HiOutlineLightBulb className='lightbulb-icon' />
-                        <span className='liseline'>5</span>
+                        <FaFistRaised className='fist-icon' />
+                        <span className='liseline'>Player: {playerName}</span>
                     </p>
                 </div>
                 <div className='info-1-container'>
@@ -123,14 +209,17 @@ function GamePlay() {
                         <span className='left' style={{ float: 'left' }}>{currentQN} of 8</span>
                     </p>
                     <p>
-                        <span className='right-game'> 2:15< AiFillClockCircle className='clock-icon' /></span>
+                        <span className='right-game'>{counter}<  AiFillClockCircle className='clock-icon' /></span>
                     </p>
+                </div>
+                <div>
+                <span className='right-game'>{score} points<  GiStarMedal className='clock-icon' /> </span>
                 </div>
                 <h5 className='h5-ingame'>{currentQuestion.question}</h5>
                 <div className='options-container'>
                     <p onClick={() => {
                         check_answer(Val1);
-                    }}  className='option' >{Val1}</p>
+                    }} className='option' >{Val1}</p>
                     <p onClick={() => {
                         check_answer(Val2);
                     }} className='option' >{Val2}</p>
@@ -148,7 +237,10 @@ function GamePlay() {
                     <button className='next-btn' onClick={() => {
                         next_questain();
                     }}>next</button>
-                    <button className='quit-btn'>quit</button>
+                    <Link className='quit-btn' to="/">quit</Link>
+                    {showFinal && (<Link className='final-btn'
+            to="/final"
+            state={{ score: score }} >Finish</Link>)}
                 </div>
             </div>
         </Fragment>
