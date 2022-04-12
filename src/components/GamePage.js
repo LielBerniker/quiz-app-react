@@ -15,7 +15,7 @@ function GamePlay() {
     const [allQuestions, setAllQuestions] = React.useState([])
     const [playerName, setPlayerNmae] = React.useState("")
     const [currentQN, setcurrentQN] = React.useState(1)
-    const [currentQuestion, setCurrentQuestion] = React.useState({})
+    const [currentQuestion, setCurrentQuestion] = React.useState("")
     const [wrightQuestions, setWrightQuestions] = React.useState(0)
     const [score, setScore] = React.useState(0)
     const [timePass, setTimePass] = React.useState({})
@@ -140,9 +140,9 @@ function GamePlay() {
             var wrong_count = 0
             for (let i = 0; i < 4; i++) {
                 if (i == rand_num)
-                    cur_q_arr.push(cur_q.correct_answer)
+                    cur_q_arr.push(cur_q.correct_answer.replace(/&quot;/g, '"').replace(/&#039;/g,"'"))
                 else {
-                    cur_q_arr.push(cur_q.incorrect_answers[wrong_count])
+                    cur_q_arr.push(cur_q.incorrect_answers[wrong_count].replace(/&quot;/g, '"').replace(/&#039;/g,"'"))
                     wrong_count = wrong_count + 1
                 }
             }
@@ -155,8 +155,8 @@ function GamePlay() {
             setChoose4(false)
             var rand_num = Math.floor(Math.random() * 2);
             if (rand_num == 0) {
-                setVal1(cur_q.correct_answer)
-                setVal2(cur_q.incorrect_answers[0])
+                setVal1(cur_q.correct_answer.replace(/&quot;/g, '"').replace(/&#039;/g,"'"))
+                setVal2(cur_q.incorrect_answers[0].replace(/&quot;/g, '"').replace(/&#039;/g,"'"))
             }
             else {
                 setVal2(cur_q.correct_answer)
@@ -171,10 +171,11 @@ function GamePlay() {
             setCounter(60)
             play_click_sound()
             const cur_q = allQuestions[currentQN]
+            const cur_q_d = cur_q.question.replace(/&quot;/g, '"').replace(/&#039;/g,"'")
             const count_q = currentQN+1
             set_values(cur_q)
             setcurrentQN(count_q)
-            setCurrentQuestion(cur_q)
+            setCurrentQuestion(cur_q_d)
             setCanChoose(true)
         }
         else {
@@ -192,7 +193,8 @@ function GamePlay() {
     React.useEffect(() => {
         setPlayerNmae(location.state.playerName)
         setAllQuestions(location.state.allQuestions)
-        setCurrentQuestion(location.state.allQuestions[0])
+        const cur_q = location.state.allQuestions[0].question.replace(/&quot;/g, '"').replace(/&#039;/g,"'")
+        setCurrentQuestion(cur_q)
         set_values(location.state.allQuestions[0])
     }, [])
 
@@ -204,6 +206,10 @@ function GamePlay() {
                 <audio id='wrong-sound' src='/sounds/Wrong.mp3'></audio>
                 <audio id='click-sound' src='/sounds/Mouse-click.mp3'></audio>
             </Fragment>
+
+
+
+            
             <div className='questions'>
                 <h1 className='top-line'>Quiz Mode</h1>
                 <div className='lifeline-container'>
@@ -227,7 +233,7 @@ function GamePlay() {
                 <div>
                 <span className='right-game'>{score} points<  GiStarMedal className='clock-icon' /> </span>
                 </div>
-                <h5 className='h5-ingame'>{currentQuestion.question}</h5>
+                <h5 className='h5-ingame'>{currentQuestion}</h5>
                 <div className='options-container'>
                     <p onClick={() => {
                         check_answer(Val1);
